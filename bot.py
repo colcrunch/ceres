@@ -22,15 +22,20 @@ class CeresBot(Bot):
             pm_help=None,
             description="A sane discord bot.",
             status=discord.Status.online,
-            activity=discord.Activity(name="Waiting to welcome people.", type=discord.ActivityType.custom),
+            activity=discord.Activity(name="for new people.", type=discord.ActivityType.watching),
             intents=intents
         )
 
-        extensions = os.getenv("EXTENSIONS", "").split(",")
+    def run(self):
+        super().run(self.token)
+
+    async def setup_hook(self) -> None:
+        extensions = os.getenv("EXTENSIONS", "").replace(" ", "").split(",")
+        print(extensions)
 
         for extension in extensions:
             try:
-                self.load_extension(f"cogs.{extension}.cog")
+                await self.load_extension(f"cogs.{extension}.cog")
             except Exception as e:
                 self.logger.critical(f"{extension} failed to load. Exception:")
                 self.logger.critical(e)
@@ -39,8 +44,9 @@ class CeresBot(Bot):
                 self.logger.info(f"{extension} loaded.")
                 print(f"{extension} loaded.")
 
-    def run(self):
-        super().run(self.token)
+        main_guild = discord.Object(id=os.getenv("MAIN_GUILD_ID", "0"))
+        self.tree.copy_global_to(guild=main_guild)
+        await self.tree.sync(guild=main_guild)
 
     async def on_ready(self):
         self.logger.info(f"Bot started! (U: {self.user.name} I: {self.user.id})")
