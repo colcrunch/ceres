@@ -4,6 +4,7 @@ import os
 import discord
 from discord.ext.commands import Bot
 
+from utils.firebase import get_db
 from utils.loggers import get_logger
 
 
@@ -16,6 +17,7 @@ class CeresBot(Bot):
         self.started = datetime.datetime.utcnow()
 
         self.logger = get_logger(__name__)
+        self.db = get_db()
 
         super().__init__(
             command_prefix=os.getenv("CLASSIC_COMMAND_PREFIX", "!"),
