@@ -1,6 +1,8 @@
 import discord
 from discord.ext.commands import GroupCog
 
+from .views import ConfirmView
+
 
 class WelcomeCog(GroupCog, group_name="welcome"):
     def __init__(self, bot):
@@ -17,8 +19,38 @@ class WelcomeCog(GroupCog, group_name="welcome"):
         priv_message="The message you would like to be privately displayed to users when they join."
     )
     async def set_message(self, inter: discord.Interaction, pub_message: str, priv_message: str):
-        print(pub_message)
-        print(priv_message)
+        doc_ref = self.bot.db.collection("welcome").document(f"{inter.guild.id}")
+
+        data = {
+            "priv_message": priv_message,
+            "pub_message": pub_message
+        }
+
+        messages = doc_ref.get()
+        view = None
+        if messages.exists:
+            message_dict = messages.to_dict()
+            if "priv_message" in message_dict.keys():
+                view = ConfirmView()
+                await inter.response.send_message(
+                    (
+                        f"Welcome messages already set!\n"
+                        f"Public:  `{message_dict['pub_message']}`\n"
+                        f"Private: `{message_dict['priv_message']}`\n"
+                        f"Are you sure you want to overwrite these messages?"
+                    ),
+                    view=view,
+                    ephemeral=True
+                )
+                await view.wait()
+                if view.value is None:
+                    return await inter.edit_original_response(content="Timed out.", view=None)
+                elif view.value is False:
+                    return await inter.edit_original_response(content="Canceled.", view=None)
+
+        doc_ref.set(data, merge=True)
+        if view is not None:
+            return await inter.edit_original_response(content="Messages set!", view=None)
         return await inter.response.send_message("Messages set!", ephemeral=True)
 
     @discord.app_commands.command(
@@ -31,7 +63,36 @@ class WelcomeCog(GroupCog, group_name="welcome"):
         welcome_channel="The channel to send welcome messages in."
     )
     async def set_channel(self, inter: discord.Interaction, welcome_channel: discord.TextChannel):
-        print(welcome_channel.name, welcome_channel.id)
+        doc_ref = self.bot.db.collection("welcome").document(f"{inter.guild_id}")
+
+        data = {
+            "channel": welcome_channel.id
+        }
+
+        channel = doc_ref.get()
+        view = None
+        if channel.exists:
+            channel_dict = channel.to_dict()
+            if "channel" in channel_dict.keys():
+                view = ConfirmView()
+                await inter.response.send_message(
+                    (
+                        f"Welcome channel already set!\n"
+                        f"Channel: {self.bot.get_channel(channel_dict['channel']).mention}\n"
+                        f"Are you sure you want to change it?"
+                    ),
+                    view=view,
+                    ephemeral=True
+                )
+                await view.wait()
+                if view.value is None:
+                    return await inter.edit_original_response(content="Timed out.", view=None)
+                elif view.value is False:
+                    return await inter.edit_original_response(content="Canceled.", view=None)
+
+        doc_ref.set(data, merge=True)
+        if view is not None:
+            return await inter.edit_original_response(content=f"Channel set to {welcome_channel.mention}!", view=None)
         return await inter.response.send_message(f"Channel set to {welcome_channel.mention}!", ephemeral=True)
 
     @discord.app_commands.command(
@@ -44,7 +105,36 @@ class WelcomeCog(GroupCog, group_name="welcome"):
     )
     @discord.app_commands.checks.has_permissions(administrator=True)
     async def set_role(self, inter: discord.Interaction, role: discord.Role):
-        print(role.name, role.id)
+        doc_ref = self.bot.db.collection("welcome").document(f"{inter.guild.id}")
+
+        data = {
+            "role": role.id
+        }
+
+        doc = doc_ref.get()
+        view = None
+        if doc.exists:
+            doc_dict = doc.to_dict()
+            if "role" in doc_dict.keys():
+                view = ConfirmView()
+                await inter.response.send_message(
+                    (
+                        f"Welcome role already set!\n"
+                        f"Role: {inter.guild.get_role(doc_dict['role']).mention}\n"
+                        f"Are you sure you want to change it?"
+                    ),
+                    view=view,
+                    ephemeral=True
+                )
+                await view.wait()
+                if view.value is None:
+                    await inter.edit_original_response(content="Timed out.", view=None)
+                if view.value is False:
+                    await inter.edit_original_response(content="Canceled.", view=None)
+
+        doc_ref.set(data, merge=True)
+        if view is not None:
+            return await inter.edit_original_response(content=f"Role changed to {role.mention}!", view=None)
         return await inter.response.send_message(f"Role set to {role.mention}!", ephemeral=True)
 
     @GroupCog.listener()
