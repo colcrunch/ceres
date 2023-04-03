@@ -179,9 +179,9 @@ class WelcomeCog(Cog):
                 )
                 await view.wait()
                 if view.value is None:
-                    await inter.edit_original_response(content="Timed out.", view=None)
+                    return await inter.edit_original_response(content="Timed out.", view=None)
                 if view.value is False:
-                    await inter.edit_original_response(content="Canceled.", view=None)
+                    return await inter.edit_original_response(content="Canceled.", view=None)
 
         doc_ref.set(data, merge=True)
         if view is not None:
@@ -221,9 +221,9 @@ class WelcomeCog(Cog):
                 )
                 await view.wait()
                 if view.value is None:
-                    await inter.edit_original_response(content="Timed out.", view=None)
+                    return await inter.edit_original_response(content="Timed out.", view=None)
                 if view.value is False:
-                    await inter.edit_original_response(content="Canceled.", view=None)
+                    return await inter.edit_original_response(content="Canceled.", view=None)
 
         doc_ref.set(data, merge=True)
         if view is not None:
