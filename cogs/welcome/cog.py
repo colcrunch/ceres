@@ -14,33 +14,33 @@ class WelcomeCog(Cog):
 
     @welcome_group.command(
         name="set_message",
-        description="Sets the messages to be sent when a new user joins the guild."
+        description="Sets the message to be sent when a new user joins the guild."
     )
     @discord.app_commands.guild_only()
     @discord.app_commands.checks.has_permissions(administrator=True)
     @discord.app_commands.describe(
-        pub_message="The message you would like to be publicly displayed to users when they join.",
-        priv_message="The message you would like to be privately displayed to users when they join."
+        message=(
+                "The message you would like to be publicly displayed to users when they join. "
+                "(Use {mention} anywhere you would like to mention the new user)"
+        ),
     )
-    async def set_message(self, inter: discord.Interaction, pub_message: str, priv_message: str):
+    async def set_message(self, inter: discord.Interaction, message: str):
         doc_ref = self.bot.db.collection("welcome").document(f"{inter.guild.id}")
 
         data = {
-            "priv_message": priv_message,
-            "pub_message": pub_message
+            "message": message
         }
 
         messages = doc_ref.get()
         view = None
         if messages.exists:
             message_dict = messages.to_dict()
-            if "priv_message" in message_dict.keys():
+            if "message" in message_dict.keys():
                 view = ConfirmView()
                 await inter.response.send_message(
                     (
-                        f"Welcome messages already set!\n"
-                        f"Public:  `{message_dict['pub_message']}`\n"
-                        f"Private: `{message_dict['priv_message']}`\n"
+                        f"Welcome message is already set!\n"
+                        f"Message: `{message_dict['message']}`\n"
                         f"Are you sure you want to overwrite these messages?"
                     ),
                     view=view,
