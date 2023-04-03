@@ -144,9 +144,41 @@ class WelcomeCog(Cog):
             return await inter.edit_original_response(content=f"Role changed to {role.mention}!", view=None)
         return await inter.response.send_message(f"Role set to {role.mention}!", ephemeral=True)
 
-    @GroupCog.listener()
-    async def on_member_join(self, member: discord.Member):
+    @discord.app_commands.command(
+        name="join",
+        description="Add yourself to the recruitment channel."
+    )
+    @discord.app_commands.guild_only()
+    async def join(self, inter: discord.Interaction):
         pass
+
+    @Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        doc_ref = self.bot.db.collection("welcome").document(f"{member.guild.id}")
+
+        welcome_doc = doc_ref.get()
+        if not welcome_doc.exists:
+            return
+        else:
+            welcome_dict = welcome_doc.to_dict()
+            req_keys = ["channel", "role", "message"]
+            keys_present = all(key in welcome_dict.keys() for key in req_keys)
+            if not keys_present:
+                return
+
+        fmt = {"mention": member.mention}
+        formatted = welcome_dict["message"].format(**fmt)
+
+        channel = member.guild.get_channel(welcome_dict["channel"])
+        role = member.guild.get_role(welcome_dict["role"])
+
+        await asyncio.sleep(10)
+
+        if len(member.roles) == 1:
+            view = WelcomeView(member, role)
+            msg = await channel.send(formatted, view=view)
+            view.set_message(msg)
+        return
 
 
 async def setup(bot):
