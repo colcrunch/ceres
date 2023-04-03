@@ -1,14 +1,18 @@
+import asyncio
+
 import discord
-from discord.ext.commands import GroupCog
+from discord.ext.commands import Cog
 
-from .views import ConfirmView
+from .views import ConfirmView, WelcomeView
 
 
-class WelcomeCog(GroupCog, group_name="welcome"):
+class WelcomeCog(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @discord.app_commands.command(
+    welcome_group = discord.app_commands.Group(name="welcome", description="Commands relating to welcoming new users.")
+
+    @welcome_group.command(
         name="set_message",
         description="Sets the messages to be sent when a new user joins the guild."
     )
@@ -53,7 +57,7 @@ class WelcomeCog(GroupCog, group_name="welcome"):
             return await inter.edit_original_response(content="Messages set!", view=None)
         return await inter.response.send_message("Messages set!", ephemeral=True)
 
-    @discord.app_commands.command(
+    @welcome_group.command(
         name="set_channel",
         description="Sets the channel to welcome new users in."
     )
@@ -95,7 +99,7 @@ class WelcomeCog(GroupCog, group_name="welcome"):
             return await inter.edit_original_response(content=f"Channel set to {welcome_channel.mention}!", view=None)
         return await inter.response.send_message(f"Channel set to {welcome_channel.mention}!", ephemeral=True)
 
-    @discord.app_commands.command(
+    @welcome_group.command(
         name="set_role",
         description="Sets the role to be assigned to users when they interact with the private message."
     )
