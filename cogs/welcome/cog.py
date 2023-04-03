@@ -7,6 +7,9 @@ from .views import ConfirmView, WelcomeView
 
 
 class WelcomeCog(Cog):
+    """
+    This cog contains code to manage the new user experience.
+    """
     def __init__(self, bot):
         self.bot = bot
 
