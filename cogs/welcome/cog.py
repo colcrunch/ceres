@@ -101,11 +101,14 @@ class WelcomeCog(Cog):
 
     @welcome_group.command(
         name="set_role",
-        description="Sets the role to be assigned to users when they interact with the private message."
+        description=(
+                "Sets the role to be assigned to users when they interact with the welcome message"
+                "or run the join command."
+        )
     )
     @discord.app_commands.guild_only()
     @discord.app_commands.describe(
-        role="The role to be assigned to the user if they interact with the private message."
+        role="The role assigned to the user when they interact with the welcome message or run the join command."
     )
     @discord.app_commands.checks.has_permissions(administrator=True)
     async def set_role(self, inter: discord.Interaction, role: discord.Role):
