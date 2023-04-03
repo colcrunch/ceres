@@ -100,7 +100,7 @@ class WelcomeCog(Cog):
         return await inter.response.send_message(f"Channel set to {welcome_channel.mention}!", ephemeral=True)
 
     @welcome_group.command(
-        name="set_role",
+        name="set_recruit_role",
         description=(
                 "Sets the role to be assigned to users when they interact with the welcome message"
                 "or run the join command."
@@ -111,7 +111,7 @@ class WelcomeCog(Cog):
         role="The role assigned to the user when they interact with the welcome message or run the join command."
     )
     @discord.app_commands.checks.has_permissions(administrator=True)
-    async def set_role(self, inter: discord.Interaction, role: discord.Role):
+    async def set_recruit_role(self, inter: discord.Interaction, role: discord.Role):
         doc_ref = self.bot.db.collection("welcome").document(f"{inter.guild.id}")
 
         data = {
