@@ -55,12 +55,12 @@ class CoreCog(commands.Cog):
         # Define bot info
         app_info = await self.bot.application_info()
         owner = f'{app_info.owner.name}#{app_info.owner.discriminator}'
-        link = 'https://github.com/colcrunch/mercury'
+        link = 'https://github.com/colcrunch/ceres'
         about_text = "Ceres is a bot written specifically for Fancypants Inc."
 
         embed = self.__base_embed(title=f'About {self.bot.user.name}', description=about_text)
         embed.add_field(name="Bot Owner", value=owner, inline=True)
-        embed.add_field(name='Bot Author', value="Col Crunch#3670", inline=True)
+        embed.add_field(name='Bot Author', value="@colcrunch", inline=True)
         embed.add_field(name='GitHub', value=link, inline=False)
 
         return await i.response.send_message(embed=embed)

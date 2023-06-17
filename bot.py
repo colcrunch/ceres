@@ -2,22 +2,32 @@ import datetime
 import os
 
 import discord
+import django
 from discord.ext.commands import Bot
+from django.conf import settings
 
-from utils.firebase import get_db
+import ceres_django_settings
 from utils.loggers import get_logger
 
 
 class CeresBot(Bot):
-
     def __init__(self, *args, **qwargs):
+        """
+        Set up the bot class.
+        """
+        # Store discord-related data
         intents = discord.Intents.all()
-
         self.token = os.getenv("BOT_TOKEN", None)
+
+        # Record start time for bot, used for calculating uptime.
         self.started = datetime.datetime.utcnow()
 
+        # Set up logging
         self.logger = get_logger(__name__)
-        self.db = get_db()
+
+        # Set up django ORM
+        settings.configure(default_settings=ceres_django_settings, DEBUG=True)
+        django.setup()
 
         super().__init__(
             command_prefix=os.getenv("CLASSIC_COMMAND_PREFIX", "!"),
@@ -28,10 +38,13 @@ class CeresBot(Bot):
             intents=intents
         )
 
-    def run(self):
+    def run(self, **kwargs):
         super().run(self.token)
 
     async def setup_hook(self) -> None:
+        """
+        Set up the bot. Load extensions, handle extensions failing to load, setup slash commands.
+        """
         extensions = os.getenv("EXTENSIONS", "").replace(" ", "").split(",")
         print(extensions)
 
@@ -50,6 +63,9 @@ class CeresBot(Bot):
         self.tree.copy_global_to(guild=main_guild)
         await self.tree.sync(guild=main_guild)
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
+        """
+        Print and log a message to indicate that the bot is online and ready.
+        """
         self.logger.info(f"Bot started! (U: {self.user.name} I: {self.user.id})")
         print(f"Bot started! (U: {self.user.name} I: {self.user.id})")
