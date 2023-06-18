@@ -23,7 +23,7 @@ class VoiceActivityCog(Cog):
             # Handle unclosed activity
             async for u in unclosed:
                 # We will assume that if the bot missed a disconnect event, the user would have been on for an hour.
-                u.disconnect_time = u.disconnect_time + datetime.timedelta(hours=1)
+                u.disconnect_time = u.connect_time + datetime.timedelta(hours=1)
                 await u.asave()
 
         # Now that we have dealt with unclosed activity lets create an open activity record
@@ -44,8 +44,16 @@ class VoiceActivityCog(Cog):
         now = datetime.datetime.utcnow()
 
         # First check that we have a record of this user joining voice.
-        open = VoiceActivity.objects.filter(guild_id=member.guild_id, user_id=member.id).order_by("-connect_time")
-        if not await open.aexists() or await open.afirst().disconnect_time is None:
+        open = VoiceActivity.objects.filter(guild_id=member.guild.id, user_id=member.id).order_by("-connect_time")
+        create = False
+        if not await open.aexists():
+            create = True
+
+        rec = await open.afirst()
+        if rec.disconnect_time is not None:
+            create = True
+        
+        if create:
             # If we get here we do not have record of the user joining.
             # Create and save a new record assuming a 1hr duration.
             va = VoiceActivity(
@@ -58,7 +66,6 @@ class VoiceActivityCog(Cog):
             return
 
         # Now that we have determined that there is an open activity record, lets close it.
-        rec = await open.afirst()
         rec.disconnect_time = now
         await rec.asave()
         return
