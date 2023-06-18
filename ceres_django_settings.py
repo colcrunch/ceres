@@ -24,6 +24,7 @@ DATABASES = {
     }
 }
 DEFAULT_TABLESPACE = ""
+DEFAULT_INDEX_TABLESPACE = ""
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 DATABASE_ROUTERS = []
 

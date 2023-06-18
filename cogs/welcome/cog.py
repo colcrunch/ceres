@@ -4,7 +4,7 @@ import discord
 from discord.ext.commands import Cog
 
 from .models import WelcomeConfig
-from .views import WelcomeView
+from .views import WelcomeView, ConfirmView
 
 
 class WelcomeCog(Cog):
@@ -41,12 +41,46 @@ class WelcomeCog(Cog):
             recruiter_role: discord.Role,
             message: str):
         # Check if a welcome config exists for the current guild
-        conf = WelcomeConfig.objects.filter(guild_id=inter.guild_id).exists()
+        conf = await WelcomeConfig.objects.filter(guild_id=inter.guild_id).aexists()
+
+        channel = inter.channel
+        view_val = False
 
         if conf:
-            print("x")
-        else:
-            print("y")
+            view = ConfirmView()
+            msg = await inter.response.send_message(
+                content="Are you sure you want to overwrite the current config?",
+                view=view,
+                ephemeral=True
+            )
+
+            await view.wait()
+
+            view_val = view.value
+
+            if not view_val:
+                return await inter.edit_original_response(content="Welcome config not overwritten.", veiw=None)
+
+        conf_dict = {
+            "guild_id": inter.guild_id,
+            "channel_id": welcome_channel.id,
+            "recruit_channel_id": recruit_channel.id,
+            "grant_role_id": grant_role.id,
+            "recruiter_role_id": recruiter_role.id,
+            "message": message
+        }
+
+        conf = await WelcomeConfig.objects.aupdate_or_create(
+            guild_id=inter.guild_id,
+            defaults=conf_dict
+        )
+
+        if view_val:
+            return await inter.edit_original_response(content="Welcome config overwritten.", view=None)
+        return await inter.response.send_message(
+            content="Welcome config saved!",
+            ephemeral=True
+        )
 
     @discord.app_commands.command(
         name="join",
