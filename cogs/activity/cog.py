@@ -41,7 +41,7 @@ class VoiceActivityCog(Cog):
         :param member: discord.Member
         :return:
         """
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow().astimezone("UTC")
 
         # First check that we have a record of this user joining voice.
         open = VoiceActivity.objects.filter(guild_id=member.guild.id, user_id=member.id).order_by("-connect_time")
@@ -52,14 +52,15 @@ class VoiceActivityCog(Cog):
         rec = await open.afirst()
         if rec.disconnect_time is not None:
             create = True
-        
+
         if create:
             # If we get here we do not have record of the user joining.
             # Create and save a new record assuming a 1hr duration.
+            ct = now - datetime.timedelta(hours=1)
             va = VoiceActivity(
                 user_id=member.id,
                 guild_id=member.guild.id,
-                connect_time=now-datetime.timedelta(hours=1),
+                connect_time=ct,
                 disconnect_time=now
             )
             await va.asave()
