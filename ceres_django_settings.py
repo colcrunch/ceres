@@ -29,7 +29,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 DATABASE_ROUTERS = []
 
 MIGRATION_MODULES = {}
-USE_TZ = "UTC"
+USE_TZ = True
+TIME_ZONE = "UTC"
+USE_DEPRECATED_PYTZ = False
 
 CACHES = {
     "default": {
