@@ -92,23 +92,19 @@ class WelcomeCog(Cog):
 
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        doc_ref = self.bot.db.collection("welcome").document(f"{member.guild.id}")
+        conf = WelcomeConfig.objects.filter(guild_id=member.guild.id)
+        print("JOIN")
 
-        welcome_doc = doc_ref.get()
-        if not welcome_doc.exists:
+        if not await conf.aexists():
             return
-        else:
-            welcome_dict = welcome_doc.to_dict()
-            req_keys = ["channel", "role", "recruiter_role", "recruit_channel" "message"]
-            keys_present = all(key in welcome_dict.keys() for key in req_keys)
-            if not keys_present:
-                return
+
+        conf = await conf.afirst()
 
         fmt = {"mention": member.mention}
-        formatted = welcome_dict["message"].format(**fmt)
+        formatted = conf.message.format(**fmt)
 
-        channel = member.guild.get_channel(welcome_dict["channel"])
-        role = member.guild.get_role(welcome_dict["role"])
+        channel = member.guild.get_channel(conf.channel_id)
+        role = member.guild.get_role(conf.grant_role_id)
 
         await asyncio.sleep(10)
 
