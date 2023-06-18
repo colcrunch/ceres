@@ -54,7 +54,7 @@ class CoreCog(commands.Cog):
 
         # Define bot info
         app_info = await self.bot.application_info()
-        owner = f'{app_info.owner.name}#{app_info.owner.discriminator}'
+        owner = f'@{app_info.owner.name}'
         link = 'https://github.com/colcrunch/ceres'
         about_text = "Ceres is a bot written specifically for Fancypants Inc."
 
