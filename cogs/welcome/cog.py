@@ -88,7 +88,39 @@ class WelcomeCog(Cog):
     )
     @discord.app_commands.guild_only()
     async def join(self, inter: discord.Interaction):
-        pass
+        conf = WelcomeConfig.objects.filter(guild_id=inter.guild_id)
+
+        if not await conf.aexists():
+            return await inter.response.send_message(
+                (
+                    "There is no welcome config set for this server. If you believe this message to be in error"
+                    " please inform a server admin."
+                ),
+                ephemeral=True
+            )
+
+        conf = await conf.afirst()
+
+        role = inter.guild.get_role(conf.grant_role_id)
+        channel = inter.guild.get_channel(conf.recruit_channel_id)
+
+        if role in inter.user.roles:
+            return await inter.response.send_message(
+                "You are already in the recruitment channel!",
+                ephemeral=True
+            )
+        elif "Member" in [role.name for role in inter.user.roles]:
+            return await inter.response.send_message(
+                "You can not join more than once!",
+                ephemeral=True
+            )
+
+        await inter.user.add_roles(role, reason="Added via the join command.")
+        return await inter.response.send_message(
+            f"You have been added to {channel.mention}.",
+            ephemeral=True
+        )
+
 
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
