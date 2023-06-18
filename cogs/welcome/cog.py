@@ -93,7 +93,6 @@ class WelcomeCog(Cog):
     @Cog.listener()
     async def on_member_join(self, member: discord.Member):
         conf = WelcomeConfig.objects.filter(guild_id=member.guild.id)
-        print("JOIN")
 
         if not await conf.aexists():
             return
