@@ -41,7 +41,7 @@ class VoiceActivityCog(Cog):
         :param member: discord.Member
         :return:
         """
-        now = datetime.datetime.utcnow().astimezone("UTC")
+        now = datetime.datetime.now(datetime.timezone.utc)
 
         # First check that we have a record of this user joining voice.
         open = VoiceActivity.objects.filter(guild_id=member.guild.id, user_id=member.id).order_by("-connect_time")
