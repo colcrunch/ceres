@@ -2,11 +2,8 @@ import datetime
 import os
 
 import discord
-import django
 from discord.ext.commands import Bot
-from django.conf import settings
 
-import ceres_django_settings
 from utils.loggers import get_logger
 
 
@@ -24,10 +21,6 @@ class CeresBot(Bot):
 
         # Set up logging
         self.logger = get_logger(__name__)
-
-        # Set up django ORM
-        settings.configure(default_settings=ceres_django_settings, DEBUG=True)
-        django.setup()
 
         super().__init__(
             command_prefix=os.getenv("CLASSIC_COMMAND_PREFIX", "!"),
