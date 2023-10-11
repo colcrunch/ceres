@@ -8,7 +8,7 @@ from utils.loggers import get_logger
 
 
 class CeresBot(Bot):
-    def __init__(self, *args, **qwargs):
+    def __init__(self, *args, **kwargs):
         """
         Set up the bot class.
         """
